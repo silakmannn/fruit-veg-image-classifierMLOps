@@ -8,7 +8,7 @@ Build an image classifier that can recognize 10 fruit and vegetable classes, the
 
 ## Current Status
 
-Step 3 is in progress: dataset classes and folder structure are defined. Image collection is next.
+Step 3 is complete: the 10-class local dataset is defined and populated.
 
 ## Project Structure
 
@@ -63,7 +63,7 @@ pip install -r requirements.txt
 
 ## Next Step
 
-Collect images for the 10 classes and place them into the `data/raw/train`, `data/raw/val`, and `data/raw/test` folders.
+Step 4: Build the baseline image classification model.
 
 ## Dataset
 
