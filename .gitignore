@@ -39,6 +39,8 @@ models/*.joblib
 
 # Experiment tracking
 mlruns/
+mlartifacts/
+mlflow.db
 wandb/
 
 # Reports and generated outputs

@@ -8,7 +8,7 @@ Build an image classifier that can recognize 10 fruit and vegetable classes, the
 
 ## Current Status
 
-Step 6 is complete: simple training data augmentation has been added.
+Step 7 is in progress: MLflow experiment tracking has been added to training.
 
 ## Project Structure
 
@@ -63,7 +63,7 @@ pip install -r requirements.txt
 
 ## Next Step
 
-Step 7: Add experiment tracking with MLflow.
+Run training with MLflow tracking enabled, then inspect the run in the MLflow UI.
 
 ## Dataset
 
@@ -112,6 +112,22 @@ Training history is saved locally:
 ```text
 reports/metrics/baseline_training_history.csv
 ```
+
+Training also logs an MLflow experiment to local SQLite storage in `mlflow.db`. MLflow tracks parameters, metrics, and artifacts for each run.
+
+Open the MLflow UI:
+
+```powershell
+.\.venv\Scripts\mlflow.exe ui --backend-store-uri sqlite:///mlflow.db
+```
+
+Then visit:
+
+```text
+http://127.0.0.1:5000
+```
+
+See `docs/mlflow_tracking.md` for details.
 
 ## Baseline Evaluation
 

@@ -2,9 +2,11 @@ from pathlib import Path
 import csv
 import time
 
+import mlflow
 import torch
 from torch import nn
 from torch.utils.data import DataLoader
+from mlflow.tracking import MlflowClient
 from torchvision import datasets, transforms
 
 
@@ -12,11 +14,14 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = PROJECT_ROOT / "data" / "raw"
 MODEL_DIR = PROJECT_ROOT / "models"
 METRICS_DIR = PROJECT_ROOT / "reports" / "metrics"
+MLFLOW_DB = PROJECT_ROOT / "mlflow.db"
+MLFLOW_ARTIFACT_DIR = PROJECT_ROOT / "mlartifacts"
 IMAGE_SIZE = 100
 BATCH_SIZE = 32
 EPOCHS = 5
 LEARNING_RATE = 0.001
 USE_DATA_AUGMENTATION = True
+EXPERIMENT_NAME = "fruit-veg-classifier"
 
 
 class SimpleCNN(nn.Module):
@@ -176,9 +181,47 @@ def save_training_history(history: list[dict[str, float]]) -> None:
         writer.writerows(history)
 
 
+def configure_mlflow() -> None:
+    mlflow.set_tracking_uri(f"sqlite:///{MLFLOW_DB.as_posix()}")
+    client = MlflowClient()
+    experiment = client.get_experiment_by_name(EXPERIMENT_NAME)
+    if experiment is None:
+        client.create_experiment(
+            EXPERIMENT_NAME,
+            artifact_location=MLFLOW_ARTIFACT_DIR.as_uri(),
+        )
+    mlflow.set_experiment(EXPERIMENT_NAME)
+
+
+def log_mlflow_setup(
+    class_names: list[str],
+    train_image_count: int,
+    val_image_count: int,
+    device: torch.device,
+) -> None:
+    mlflow.log_params(
+        {
+            "model_name": "simple_cnn_baseline",
+            "image_size": IMAGE_SIZE,
+            "batch_size": BATCH_SIZE,
+            "epochs": EPOCHS,
+            "learning_rate": LEARNING_RATE,
+            "optimizer": "Adam",
+            "loss_function": "CrossEntropyLoss",
+            "use_data_augmentation": USE_DATA_AUGMENTATION,
+            "num_classes": len(class_names),
+            "classes": ",".join(class_names),
+            "train_images": train_image_count,
+            "val_images": val_image_count,
+            "device": str(device),
+        }
+    )
+
+
 def main() -> None:
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     train_loader, val_loader, class_names = build_dataloaders()
+    configure_mlflow()
 
     model = SimpleCNN(num_classes=len(class_names)).to(device)
     criterion = nn.CrossEntropyLoss()
@@ -193,43 +236,73 @@ def main() -> None:
     history = []
     start_time = time.time()
 
-    for epoch in range(EPOCHS):
-        train_loss, train_accuracy = train_one_epoch(
-            model, train_loader, criterion, optimizer, device
-        )
-        val_loss, val_accuracy = evaluate(model, val_loader, criterion, device)
-
-        print(
-            f"Epoch {epoch + 1}/{EPOCHS} | "
-            f"train_loss={train_loss:.4f} train_acc={train_accuracy:.4f} | "
-            f"val_loss={val_loss:.4f} val_acc={val_accuracy:.4f}"
-        )
-        history.append(
+    with mlflow.start_run(run_name="simple-cnn-augmentation"):
+        mlflow.set_tags(
             {
-                "epoch": epoch + 1,
-                "train_loss": train_loss,
-                "train_accuracy": train_accuracy,
-                "val_loss": val_loss,
-                "val_accuracy": val_accuracy,
+                "model_family": "cnn",
+                "dataset_version": "v1-local-10-class",
+                "artifact_location": str(MLFLOW_ARTIFACT_DIR),
             }
         )
+        log_mlflow_setup(
+            class_names,
+            len(train_loader.dataset),
+            len(val_loader.dataset),
+            device,
+        )
 
-        if val_accuracy > best_val_accuracy:
-            best_val_accuracy = val_accuracy
-            save_checkpoint(
-                model,
-                class_names,
-                best_val_accuracy,
-                epoch + 1,
-                MODEL_DIR / "simple_cnn_baseline.pt",
+        for epoch in range(EPOCHS):
+            train_loss, train_accuracy = train_one_epoch(
+                model, train_loader, criterion, optimizer, device
+            )
+            val_loss, val_accuracy = evaluate(model, val_loader, criterion, device)
+
+            print(
+                f"Epoch {epoch + 1}/{EPOCHS} | "
+                f"train_loss={train_loss:.4f} train_acc={train_accuracy:.4f} | "
+                f"val_loss={val_loss:.4f} val_acc={val_accuracy:.4f}"
+            )
+            history.append(
+                {
+                    "epoch": epoch + 1,
+                    "train_loss": train_loss,
+                    "train_accuracy": train_accuracy,
+                    "val_loss": val_loss,
+                    "val_accuracy": val_accuracy,
+                }
+            )
+            mlflow.log_metrics(
+                {
+                    "train_loss": train_loss,
+                    "train_accuracy": train_accuracy,
+                    "val_loss": val_loss,
+                    "val_accuracy": val_accuracy,
+                },
+                step=epoch + 1,
             )
 
-    elapsed_minutes = (time.time() - start_time) / 60
-    save_training_history(history)
-    print(f"Best validation accuracy: {best_val_accuracy:.4f}")
-    print(f"Saved model: {MODEL_DIR / 'simple_cnn_baseline.pt'}")
-    print(f"Saved history: {METRICS_DIR / 'baseline_training_history.csv'}")
-    print(f"Training time: {elapsed_minutes:.2f} minutes")
+            if val_accuracy > best_val_accuracy:
+                best_val_accuracy = val_accuracy
+                save_checkpoint(
+                    model,
+                    class_names,
+                    best_val_accuracy,
+                    epoch + 1,
+                    MODEL_DIR / "simple_cnn_baseline.pt",
+                )
+
+        elapsed_minutes = (time.time() - start_time) / 60
+        save_training_history(history)
+        mlflow.log_metric("best_val_accuracy", best_val_accuracy)
+        mlflow.log_metric("training_time_minutes", elapsed_minutes)
+        mlflow.log_artifact(METRICS_DIR / "baseline_training_history.csv")
+        mlflow.log_artifact(MODEL_DIR / "simple_cnn_baseline.pt")
+
+        print(f"Best validation accuracy: {best_val_accuracy:.4f}")
+        print(f"Saved model: {MODEL_DIR / 'simple_cnn_baseline.pt'}")
+        print(f"Saved history: {METRICS_DIR / 'baseline_training_history.csv'}")
+        print(f"MLflow run: {mlflow.active_run().info.run_id}")
+        print(f"Training time: {elapsed_minutes:.2f} minutes")
 
 
 if __name__ == "__main__":
