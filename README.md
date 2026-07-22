@@ -8,7 +8,7 @@ Build an image classifier that can recognize 10 fruit and vegetable classes, the
 
 ## Current Status
 
-Step 4 is complete: a simple CNN baseline model has been trained and saved locally.
+Step 5 is complete: the baseline model has been evaluated on the test set.
 
 ## Project Structure
 
@@ -99,3 +99,25 @@ models/simple_cnn_baseline.pt
 ```
 
 Model files are ignored by Git.
+
+Training history is saved locally:
+
+```text
+reports/metrics/baseline_training_history.csv
+```
+
+## Baseline Evaluation
+
+Run the baseline evaluation script:
+
+```powershell
+.\.venv\Scripts\python.exe -m src.fruit_veg_classifier.evaluate_baseline
+```
+
+The script evaluates the saved model on `data/raw/test` and saves local reports:
+
+```text
+reports/metrics/baseline_test_summary.csv
+reports/metrics/baseline_test_predictions.csv
+reports/figures/baseline_confusion_matrix.png
+```

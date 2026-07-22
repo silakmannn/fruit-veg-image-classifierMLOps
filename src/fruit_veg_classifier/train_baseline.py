@@ -1,4 +1,5 @@
 from pathlib import Path
+import csv
 import time
 
 import torch
@@ -10,6 +11,7 @@ from torchvision import datasets, transforms
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = PROJECT_ROOT / "data" / "raw"
 MODEL_DIR = PROJECT_ROOT / "models"
+METRICS_DIR = PROJECT_ROOT / "reports" / "metrics"
 IMAGE_SIZE = 100
 BATCH_SIZE = 32
 EPOCHS = 5
@@ -140,6 +142,17 @@ def save_checkpoint(
     torch.save(checkpoint, model_path)
 
 
+def save_training_history(history: list[dict[str, float]]) -> None:
+    METRICS_DIR.mkdir(parents=True, exist_ok=True)
+    history_path = METRICS_DIR / "baseline_training_history.csv"
+    fieldnames = ["epoch", "train_loss", "train_accuracy", "val_loss", "val_accuracy"]
+
+    with history_path.open("w", newline="", encoding="utf-8") as file:
+        writer = csv.DictWriter(file, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(history)
+
+
 def main() -> None:
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     train_loader, val_loader, class_names = build_dataloaders()
@@ -154,6 +167,7 @@ def main() -> None:
     print(f"Validation images: {len(val_loader.dataset)}")
 
     best_val_accuracy = 0.0
+    history = []
     start_time = time.time()
 
     for epoch in range(EPOCHS):
@@ -167,6 +181,15 @@ def main() -> None:
             f"train_loss={train_loss:.4f} train_acc={train_accuracy:.4f} | "
             f"val_loss={val_loss:.4f} val_acc={val_accuracy:.4f}"
         )
+        history.append(
+            {
+                "epoch": epoch + 1,
+                "train_loss": train_loss,
+                "train_accuracy": train_accuracy,
+                "val_loss": val_loss,
+                "val_accuracy": val_accuracy,
+            }
+        )
 
         if val_accuracy > best_val_accuracy:
             best_val_accuracy = val_accuracy
@@ -179,8 +202,10 @@ def main() -> None:
             )
 
     elapsed_minutes = (time.time() - start_time) / 60
+    save_training_history(history)
     print(f"Best validation accuracy: {best_val_accuracy:.4f}")
     print(f"Saved model: {MODEL_DIR / 'simple_cnn_baseline.pt'}")
+    print(f"Saved history: {METRICS_DIR / 'baseline_training_history.csv'}")
     print(f"Training time: {elapsed_minutes:.2f} minutes")
 
 
