@@ -8,22 +8,39 @@ Build an image classifier that can recognize 10 fruit and vegetable classes, the
 
 ## Current Status
 
-Step 1 is complete: repository creation and project structure.
+Step 2 is complete: Python environment setup.
 
 ## Project Structure
 
 ```text
 imgclassifier/
-├── configs/        # Training and app configuration files
-├── data/           # Local datasets; raw image files are not committed
-├── docs/           # Learning notes and project documentation
-├── models/         # Trained model artifacts; large files are not committed
-├── notebooks/      # Exploration notebooks
-├── reports/        # Metrics, plots, and evaluation outputs
-├── src/            # Python package source code
-├── tests/          # Automated tests
-├── .gitignore
-└── README.md
+|-- configs/        # Training and app configuration files
+|-- data/           # Local datasets; raw image files are not committed
+|-- docs/           # Learning notes and project documentation
+|-- models/         # Trained model artifacts; large files are not committed
+|-- notebooks/      # Exploration notebooks
+|-- reports/        # Metrics, plots, and evaluation outputs
+|-- requirements.txt
+|-- src/            # Python package source code
+|-- tests/          # Automated tests
+|-- .gitignore
+`-- README.md
+```
+
+## Environment Setup
+
+Create and activate a virtual environment:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+Install dependencies:
+
+```powershell
+python -m pip install --upgrade pip
+pip install -r requirements.txt
 ```
 
 ## Roadmap
@@ -46,4 +63,4 @@ imgclassifier/
 
 ## Next Step
 
-Step 2: Set up the Python environment.
+Step 3: Define the 10-class dataset.
