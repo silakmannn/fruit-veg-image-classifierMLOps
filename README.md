@@ -8,7 +8,7 @@ Build an image classifier that can recognize 10 fruit and vegetable classes, the
 
 ## Current Status
 
-Step 3 is complete: the 10-class local dataset is defined and populated.
+Step 4 is complete: a simple CNN baseline model has been trained and saved locally.
 
 ## Project Structure
 
@@ -83,3 +83,19 @@ bell_pepper
 ```
 
 Images should be placed under `data/raw/train`, `data/raw/val`, and `data/raw/test`. See `data/README.md` and `docs/dataset_plan.md` for details.
+
+## Baseline Training
+
+Run the baseline training script:
+
+```powershell
+.\.venv\Scripts\python.exe -m src.fruit_veg_classifier.train_baseline
+```
+
+The script trains a small CNN with PyTorch and saves the best checkpoint locally:
+
+```text
+models/simple_cnn_baseline.pt
+```
+
+Model files are ignored by Git.
