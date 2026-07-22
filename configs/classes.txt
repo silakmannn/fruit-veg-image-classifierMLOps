@@ -1,0 +1,10 @@
+apple
+banana
+orange
+grape
+strawberry
+tomato
+potato
+carrot
+cucumber
+bell_pepper

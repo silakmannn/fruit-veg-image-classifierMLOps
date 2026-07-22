@@ -8,7 +8,7 @@ Build an image classifier that can recognize 10 fruit and vegetable classes, the
 
 ## Current Status
 
-Step 2 is complete: Python environment setup.
+Step 3 is in progress: dataset classes and folder structure are defined. Image collection is next.
 
 ## Project Structure
 
@@ -63,4 +63,23 @@ pip install -r requirements.txt
 
 ## Next Step
 
-Step 3: Define the 10-class dataset.
+Collect images for the 10 classes and place them into the `data/raw/train`, `data/raw/val`, and `data/raw/test` folders.
+
+## Dataset
+
+The first dataset version uses these 10 classes:
+
+```text
+apple
+banana
+orange
+grape
+strawberry
+tomato
+potato
+carrot
+cucumber
+bell_pepper
+```
+
+Images should be placed under `data/raw/train`, `data/raw/val`, and `data/raw/test`. See `data/README.md` and `docs/dataset_plan.md` for details.
