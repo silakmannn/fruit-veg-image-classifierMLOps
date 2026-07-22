@@ -16,6 +16,7 @@ IMAGE_SIZE = 100
 BATCH_SIZE = 32
 EPOCHS = 5
 LEARNING_RATE = 0.001
+USE_DATA_AUGMENTATION = True
 
 
 class SimpleCNN(nn.Module):
@@ -46,7 +47,26 @@ class SimpleCNN(nn.Module):
 
 
 def build_dataloaders() -> tuple[DataLoader, DataLoader, list[str]]:
-    transform = transforms.Compose(
+    train_transforms = [
+        transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
+    ]
+
+    if USE_DATA_AUGMENTATION:
+        train_transforms.extend(
+            [
+                transforms.RandomHorizontalFlip(p=0.5),
+                transforms.RandomRotation(degrees=10),
+            ]
+        )
+
+    train_transforms.extend(
+        [
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
+        ]
+    )
+
+    eval_transform = transforms.Compose(
         [
             transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
             transforms.ToTensor(),
@@ -54,8 +74,10 @@ def build_dataloaders() -> tuple[DataLoader, DataLoader, list[str]]:
         ]
     )
 
-    train_dataset = datasets.ImageFolder(DATA_DIR / "train", transform=transform)
-    val_dataset = datasets.ImageFolder(DATA_DIR / "val", transform=transform)
+    train_dataset = datasets.ImageFolder(
+        DATA_DIR / "train", transform=transforms.Compose(train_transforms)
+    )
+    val_dataset = datasets.ImageFolder(DATA_DIR / "val", transform=eval_transform)
 
     train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False)
@@ -135,6 +157,7 @@ def save_checkpoint(
         "batch_size": BATCH_SIZE,
         "epochs": EPOCHS,
         "learning_rate": LEARNING_RATE,
+        "use_data_augmentation": USE_DATA_AUGMENTATION,
         "best_epoch": epoch,
         "val_accuracy": val_accuracy,
         "model_name": "simple_cnn_baseline",

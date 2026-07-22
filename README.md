@@ -8,7 +8,7 @@ Build an image classifier that can recognize 10 fruit and vegetable classes, the
 
 ## Current Status
 
-Step 5 is complete: the baseline model has been evaluated on the test set.
+Step 6 is complete: simple training data augmentation has been added.
 
 ## Project Structure
 
@@ -63,7 +63,7 @@ pip install -r requirements.txt
 
 ## Next Step
 
-Step 4: Build the baseline image classification model.
+Step 7: Add experiment tracking with MLflow.
 
 ## Dataset
 
@@ -99,6 +99,13 @@ models/simple_cnn_baseline.pt
 ```
 
 Model files are ignored by Git.
+
+During training, simple data augmentation is applied only to training images:
+
+- random horizontal flip
+- small random rotation
+
+Validation and test images are not augmented.
 
 Training history is saved locally:
 
