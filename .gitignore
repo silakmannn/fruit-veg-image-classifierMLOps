@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment variables
+.env
+.env.*
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Data and model artifacts
+data/raw/
+data/processed/
+data/interim/
+models/*.pt
+models/*.pth
+models/*.onnx
+models/*.pkl
+models/*.joblib
+
+# Experiment tracking
+mlruns/
+wandb/
+
+# Reports and generated outputs
+reports/figures/
+reports/metrics/
+
+# IDE and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
