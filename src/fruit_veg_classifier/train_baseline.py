@@ -22,6 +22,11 @@ EPOCHS = 5
 LEARNING_RATE = 0.001
 USE_DATA_AUGMENTATION = True
 EXPERIMENT_NAME = "fruit-veg-classifier"
+MODEL_NAME = "simple_cnn_baseline"
+MODEL_VERSION = "simple_cnn_v1"
+DATASET_VERSION = "fruits360_10class_v1"
+DATASET_DVC_HASH = "368e305e991f8cbb42a39e501c5cf9d4.dir"
+MODEL_DVC_HASH = "9986963301918306a9666808438a114c"
 
 
 class SimpleCNN(nn.Module):
@@ -165,7 +170,11 @@ def save_checkpoint(
         "use_data_augmentation": USE_DATA_AUGMENTATION,
         "best_epoch": epoch,
         "val_accuracy": val_accuracy,
-        "model_name": "simple_cnn_baseline",
+        "model_name": MODEL_NAME,
+        "model_version": MODEL_VERSION,
+        "dataset_version": DATASET_VERSION,
+        "dataset_dvc_hash": DATASET_DVC_HASH,
+        "model_dvc_hash": MODEL_DVC_HASH,
     }
     torch.save(checkpoint, model_path)
 
@@ -201,7 +210,11 @@ def log_mlflow_setup(
 ) -> None:
     mlflow.log_params(
         {
-            "model_name": "simple_cnn_baseline",
+            "model_name": MODEL_NAME,
+            "model_version": MODEL_VERSION,
+            "dataset_version": DATASET_VERSION,
+            "dataset_dvc_hash": DATASET_DVC_HASH,
+            "model_dvc_hash": MODEL_DVC_HASH,
             "image_size": IMAGE_SIZE,
             "batch_size": BATCH_SIZE,
             "epochs": EPOCHS,
@@ -240,7 +253,8 @@ def main() -> None:
         mlflow.set_tags(
             {
                 "model_family": "cnn",
-                "dataset_version": "v1-local-10-class",
+                "model_version": MODEL_VERSION,
+                "dataset_version": DATASET_VERSION,
                 "artifact_location": str(MLFLOW_ARTIFACT_DIR),
             }
         )

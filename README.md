@@ -8,7 +8,7 @@ Build an image classifier that can recognize 10 fruit and vegetable classes, the
 
 ## Current Status
 
-Step 7 is in progress: MLflow experiment tracking has been added to training.
+Step 8 is complete: dataset and model artifacts are versioned with DVC.
 
 ## Project Structure
 
@@ -63,7 +63,7 @@ pip install -r requirements.txt
 
 ## Next Step
 
-Run training with MLflow tracking enabled, then inspect the run in the MLflow UI.
+Step 9: Create an inference script for single-image predictions.
 
 ## Dataset
 
@@ -128,6 +128,17 @@ http://127.0.0.1:5000
 ```
 
 See `docs/mlflow_tracking.md` for details.
+
+## Versioning
+
+Dataset and model artifacts are tracked with DVC:
+
+```text
+dataset_version = fruits360_10class_v1
+model_version = simple_cnn_v1
+```
+
+Git tracks DVC pointer files, while DVC tracks the actual image/model artifacts. See `docs/versioning.md` for details.
 
 ## Baseline Evaluation
 
